@@ -1,5 +1,5 @@
 import { webSocketCache as myCache } from "../config/cacheConfig";
-import jwtDecode from "jwt-decode";
+const jwtDecode = require("jwt-decode").jwtDecode;
 
 interface RegistrationRequest {
   token: string;
@@ -8,7 +8,7 @@ interface RegistrationRequest {
 const cachingService = {
   registerSessionToCache: (sessionId: string, registrationRequest: RegistrationRequest): void => {
     console.log(`Caching the userName to the cache with registrationRequest ${JSON.stringify(registrationRequest)}`);
-    const decodedToken = jwtDecode.jwtDecode(registrationRequest.token);
+    const decodedToken = jwtDecode(registrationRequest.token);
     if (decodedToken.sub) {
         myCache.set(decodedToken.sub, sessionId);
       } else {
