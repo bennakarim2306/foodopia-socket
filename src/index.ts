@@ -10,6 +10,11 @@ const server = createServer(app);
 const io = new Server(server);
 const contactNotificationApi = new ContactNotificationApi(app, io)
 
+// Health check endpoint
+app.get('/health', (req: Request, res: Response) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 io.on('connect', (socket) => {
   console.log('a user connected to session ' + socket.id);
   socket.on("message", msg => {
@@ -34,7 +39,9 @@ io.on('connect', (socket) => {
   })
 });
 
-server.listen(3000, () => {
-  console.log('server running at http://localhost:3000');
+const PORT = process.env.PORT || 3000;
+
+server.listen(PORT, () => {
+  console.log(`server running at http://localhost:${PORT}`);
 });
 
