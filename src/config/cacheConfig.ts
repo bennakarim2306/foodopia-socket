@@ -1,8 +1,17 @@
 import { Redis } from '@upstash/redis'
 
+// Validate required environment variables
+if (!process.env.UPSTASH_REDIS_URL) {
+  throw new Error('UPSTASH_REDIS_URL environment variable is required');
+}
+
+if (!process.env.UPSTASH_REDIS_TOKEN) {
+  throw new Error('UPSTASH_REDIS_TOKEN environment variable is required');
+}
+
 const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_URL || 'https://full-quagga-15038.upstash.io',
-  token: process.env.UPSTASH_REDIS_TOKEN || '',
+  url: process.env.UPSTASH_REDIS_URL,
+  token: process.env.UPSTASH_REDIS_TOKEN,
 });
 
 export { redis };
