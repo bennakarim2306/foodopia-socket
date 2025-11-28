@@ -4,6 +4,7 @@ import { Server } from 'socket.io'
 const jwtDecode = require("jwt-decode").jwtDecode;
 const cacheService = require("./caching/cacheService").cachingService
 import {ContactNotificationApi} from "./rest/v1/contactNotificationApi"
+import { testRedisConnection } from "./config/testRedisConnection"
 
 const app: Express = express();
 const server = createServer(app);
@@ -41,7 +42,15 @@ io.on('connect', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 
-server.listen(PORT, () => {
-  console.log(`server running at http://localhost:${PORT}`);
-});
+// Test Redis connection before starting server
+testRedisConnection()
+  .then(() => {
+    server.listen(PORT, () => {
+      console.log(`server running at http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Failed to start server due to Redis connection error:', error);
+    process.exit(1);
+  });
 
