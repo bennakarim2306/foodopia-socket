@@ -1,4 +1,4 @@
-import { webSocketCache as myCache } from "../config/cacheConfig";
+import { redis } from "../config/cacheConfig";
 const jwtDecode = require("jwt-decode").jwtDecode;
 
 interface RegistrationRequest {
@@ -6,18 +6,18 @@ interface RegistrationRequest {
 }
 
 const cachingService = {
-  registerSessionToCache: (sessionId: string, registrationRequest: RegistrationRequest): void => {
+  registerSessionToCache: async (sessionId: string, registrationRequest: RegistrationRequest): Promise<void> => {
     console.log(`Caching the userName to the cache with registrationRequest ${JSON.stringify(registrationRequest)}`);
     const decodedToken = jwtDecode(registrationRequest.token);
     if (decodedToken.sub) {
-        myCache.set(decodedToken.sub, sessionId);
+        await redis.set(decodedToken.sub, sessionId, { ex: 1200 }); // 1200 seconds TTL
       } else {
         console.error("Decoded token does not contain 'sub' field.");
       }
   },
 
-  getSessionIdByUserEmail: (email: string): string | undefined => {
-    return myCache.get(email);
+  getSessionIdByUserEmail: async (email: string): Promise<string | null> => {
+    return await redis.get<string>(email);
   }
 };
 

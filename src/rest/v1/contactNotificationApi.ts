@@ -14,16 +14,18 @@ class ContactNotificationApi {
   private init() {
     this.app.use(express.json());
 
-    this.app.post("/rest/v1/contact-notification", (req: Request, res: Response) => {
+    this.app.post("/rest/v1/contact-notification", async (req: Request, res: Response) => {
       const contactNotification = req.body;
       console.log(`received body ${util.inspect(contactNotification, { depth: null })}`);
-      const sessionIds = cacheService.getSessionIdByUserEmail(contactNotification.receiver);
+      const sessionIds = await cacheService.getSessionIdByUserEmail(contactNotification.receiver);
       console.log(`received contact notification for ${contactNotification.receiver} with sessionId: ${sessionIds}, from ${contactNotification.sender}`);
-      this.io.to(sessionIds).emit("contact-notification", {
-        type: "contact_notification",
-        timestamp: contactNotification.timestamp,
-        from: contactNotification.sender
-      });
+      if (sessionIds) {
+        this.io.to(sessionIds).emit("contact-notification", {
+          type: "contact_notification",
+          timestamp: contactNotification.timestamp,
+          from: contactNotification.sender
+        });
+      }
       res.status(200).send("ok");
     });
   }
