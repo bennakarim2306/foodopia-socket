@@ -1,21 +1,21 @@
-const myCache = require("../config/cacheConfig").webSocketCache
-const jwtDecode = require("jwt-decode").jwtDecode
-
-
-// TODO here it is also very important to use typescript in the future
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.cachingService = void 0;
+const cacheConfig_1 = require("../config/cacheConfig");
+const jwtDecode = require("jwt-decode").jwtDecode;
 const cachingService = {
-
     registerSessionToCache: (sessionId, registrationRequest) => {
-        console.log(`Caching the userName to the cache wiht registrationRequest ${JSON.stringify(registrationRequest)}`)
-        myCache.set(jwtDecode(registrationRequest.token).sub, sessionId)
+        console.log(`Caching the userName to the cache with registrationRequest ${JSON.stringify(registrationRequest)}`);
+        const decodedToken = jwtDecode(registrationRequest.token);
+        if (decodedToken.sub) {
+            cacheConfig_1.webSocketCache.set(decodedToken.sub, sessionId);
+        }
+        else {
+            console.error("Decoded token does not contain 'sub' field.");
+        }
     },
-
-    getSessionIdByUserEmail: (email) =>  {
-        return myCache.get(email)
+    getSessionIdByUserEmail: (email) => {
+        return cacheConfig_1.webSocketCache.get(email);
     }
-
-}
-
-module.exports = {
-    cachingService
-}
+};
+exports.cachingService = cachingService;
